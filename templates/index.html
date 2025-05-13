@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF to Word Converter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+
+    <!-- Header Section -->
+    <header class="bg-gray-800 text-white shadow-md w-full">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <!-- Logo with Online URL -->
+            <a href="/" class="flex items-center space-x-3">
+                <img src="https://www.ilovepdf.com/img/ilovepdf.svg" alt="PDF Converter Logo" class="h-8 w-8 object-contain">
+                <span class="text-2xl font-bold">PDF Converter</span>
+            </a>
+
+            <!-- Navbar -->
+            <nav>
+                <ul class="flex space-x-6">
+                    <li><a href="/" class="hover:text-gray-400">Home</a></li>
+                    <li><a href="#about" class="hover:text-gray-400">About</a></li>
+                    <li><a href="#contact" class="hover:text-gray-400">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Section -->
+    <main class="flex items-center justify-center min-h-screen">
+        <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md text-center">
+            <h1 class="text-2xl font-bold text-gray-800 mb-6">PDF to Word Converter</h1>
+            
+            <!-- PDF Upload -->
+            <input type="file" id="pdfFile" accept=".pdf"
+                class="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 mb-4" />
+            
+            <button onclick="uploadPDF()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded mb-2">
+                Upload
+            </button>
+
+            <!-- Convert Button -->
+            <div>
+                <button id="convertBtn" onclick="convertPDF()"
+                    class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded mb-2 hidden">
+                    Convert
+                </button>
+            </div>
+
+            <!-- Download Button -->
+            <div>
+                <button id="downloadBtn" onclick="downloadFile()"
+                    class="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded hidden">
+                    Download
+                </button>
+            </div>
+
+            <p id="status" class="text-sm text-gray-500 mt-4"></p>
+        </div>
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="bg-gray-800 text-white py-4">
+        <div class="max-w-7xl mx-auto text-center">
+            <p>&copy; 2025 PDF Converter. All Rights Reserved.</p>
+        </div>
+    </footer>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PDF to Word Converter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+  <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md text-center">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">PDF to Word Converter</h1>
+
+    <input type="file" id="pdfFile" accept=".pdf" class="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 mb-4" />
+
+    <button onclick="uploadPDF()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded mb-2">
+      Upload
+    </button>
+
+    <div>
+      <button id="convertBtn" onclick="convertPDF()" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded mb-2 hidden">
+        Convert
+      </button>
+    </div>
+
+    <div>
+      <button id="downloadBtn" onclick="downloadFile()" class="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded hidden">
+        Download
+      </button>
+    </div>
+
+    <p id="status" class="text-sm text-gray-500 mt-4"></p>
+  </div>
+
+  <!-- Link to your JS file -->
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>
+        let uploadedFilename = '';
+        let downloadURL = '';
+
+        function uploadPDF() {
+            const fileInput = document.getElementById('pdfFile');
+            const file = fileInput.files[0];
+            if (!file) return alert('Please select a PDF file.');
+
+            const formData = new FormData();
+            formData.append('pdf', file);
+
+            document.getElementById('status').innerText = 'Uploading...';
+
+            fetch('/upload', { method: 'POST', body: formData })
+                .then(response => response.json())
+                .then(data => {
+                    uploadedFilename = data.filename;
+                    document.getElementById('convertBtn').classList.remove('hidden');
+                    document.getElementById('status').innerText = 'File uploaded. Ready to convert.';
+                }).catch(() => {
+                    document.getElementById('status').innerText = 'Upload failed.';
+                });
+        }
+
+        function convertPDF() {
+            document.getElementById('status').innerText = 'Converting...';
+
+            fetch('/convert', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename: uploadedFilename })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    downloadURL = data.download_url;
+                    document.getElementById('downloadBtn').classList.remove('hidden');
+                    document.getElementById('status').innerText = 'Conversion complete. Ready to download.';
+                }).catch(() => {
+                    document.getElementById('status').innerText = 'Conversion failed.';
+                });
+        }
+
+        function downloadFile() {
+            window.location.href = downloadURL;
+        }
+    </script>
+</body>
+
+</html>

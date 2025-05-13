@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: pdf-to-word-converter
+    env: python
+    buildCommand: ""
+    startCommand: gunicorn app:app
+    envVars:
+      - key: MONGO_URI
+        value: your_mongo_connection_string
